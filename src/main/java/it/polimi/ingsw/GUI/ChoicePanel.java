@@ -1,0 +1,133 @@
+package it.polimi.ingsw.GUI;
+
+import it.polimi.ingsw.GUI.messages.ActionMessage;
+import it.polimi.ingsw.GUI.messages.ActionRequest;
+import it.polimi.ingsw.observe.Observable;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class ChoicePanel extends JPanel {
+
+    private final GuiController guiController;
+    private final ImageButton moveButton=new ImageButton();
+    private final ImageButton buildButton=new ImageButton();
+    private final ImageButton endButton=new ImageButton();
+    private final ImageButton quitButton=new ImageButton();
+
+    public ChoicePanel(GuiController guiController){
+
+        this.guiController=guiController;
+        setBackground(Color.GRAY);
+        setLayout(new GridBagLayout());
+        setButtons();
+        setVisible(true);
+    }
+
+    /**
+     * calls all the methods necessary to properly set the buttons
+     */
+    private void setButtons(){
+
+        setToolTipTexts();
+        setButtonIcons();
+        addListeners();
+
+        add(moveButton,setButtonConstraints(0));
+        add(buildButton,setButtonConstraints(1));
+        add(endButton,setButtonConstraints(2));
+        add(quitButton,setButtonConstraints(3));
+    }
+
+    private void setToolTipTexts(){
+        moveButton.setToolTipText("MOVE");
+        buildButton.setToolTipText("BUILD");
+        endButton.setToolTipText("END YOUR TURN");
+        quitButton.setToolTipText("QUIT GAME (only if eliminated)");
+    }
+
+    private void setButtonIcons(){
+        moveButton.setButtonImage(Images.getImage(Images.MOVE_BUTTON_ICON));
+        buildButton.setButtonImage(Images.getImage(Images.BUILD_BUTTON_ICON));
+        endButton.setButtonImage(Images.getImage(Images.END_TURN_BUTTON_ICON));
+        quitButton.setButtonImage(Images.getImage(Images.QUIT_BUTTON_ICON));
+    }
+
+
+    private void addListeners(){
+
+        moveButton.addActionListener(new ChoiceListener());
+        buildButton.addActionListener(new ChoiceListener());
+        endButton.addActionListener(new ChoiceListener());
+        quitButton.addActionListener(new ChoiceListener());
+    }
+
+    private GridBagConstraints setButtonConstraints(int gridy) {
+
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+
+        //x position of component
+        gridBagConstraints.gridx = 0;
+        //y position of the component
+        gridBagConstraints.gridy = gridy;
+        //rows used by the component
+        gridBagConstraints.gridheight = 1;
+        // Number of columns the component takes up
+        gridBagConstraints.gridwidth = 1;
+        // Gives the layout manager a hint on how to adjust component width (0 equals fixed)
+        gridBagConstraints.weightx = 1;
+
+        // Gives the layout manager a hint on how to adjust component height (0 equals fixed)
+        gridBagConstraints.weighty = 1;
+
+        gridBagConstraints.ipadx = 0;
+        gridBagConstraints.ipady = 0;
+
+        // Defines padding top, left, bottom, right
+        gridBagConstraints.insets = new Insets(30,20,30,20);
+
+        // Defines where to place components if they don't
+        // fill the space: CENTER, NORTH, SOUTH, EAST, WEST
+        // NORTHEAST, etc.
+        gridBagConstraints.anchor = GridBagConstraints.CENTER;
+
+        // How should the component be stretched to fill the
+        // space: NONE, HORIZONTAL, VERTICAL, BOTH
+        gridBagConstraints.fill = GridBagConstraints.BOTH;
+
+        return gridBagConstraints;
+    }
+
+    /**
+     * this private class implements ActionListener and its objects are Observed by GuiController, therefore, when
+     * an action is selected (button is pressed), the guiController gets informed through notify. The notified message
+     * contains the information regarding which action was selected
+     */
+    private class ChoiceListener extends Observable<ActionMessage> implements ActionListener {
+
+        public ChoiceListener() {
+            this.addObserver(guiController);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            ActionMessage actionMessage;
+
+            if(e.getSource()==moveButton){
+                actionMessage=new ActionRequest("move");
+            }else if(e.getSource()==buildButton){
+                actionMessage=new ActionRequest("build");
+            }else if(e.getSource()==endButton){
+                actionMessage=new ActionRequest("end");
+            }else {
+                actionMessage=new ActionRequest("quit");
+            }
+            notify(actionMessage);
+        }
+    }
+
+
+}
